@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Motor de búsqueda científico</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>🔎 Motor de búsqueda científico</h1>
+    <p>Busca artículos académicos y obtén un resumen, metodología y conclusión generados por IA (OpenAI).</p>
+  </header>
+
+  <section class="controls">
+    <div class="search-box">
+      <input id="query" type="text" placeholder="Ej: machine learning medical imaging">
+      <button id="searchBtn">Buscar</button>
+    </div>
+
+    <div class="key-box">
+      <input id="openaiKey" type="text" placeholder="OpenAI API Key (Bearer)">
+      <select id="modelSelect">
+        <option value="gpt-4o-mini">gpt-4o-mini (rápido y barato)</option>
+        <option value="gpt-4o">gpt-4o (más potente)</option>
+      </select>
+    </div>
+  </section>
+
+  <main id="results"></main>
+
+  <footer>
+    <p><strong>Notas:</strong></p>
+    <ol>
+      <li>Usa la API gratuita de Semantic Scholar para obtener artículos.</li>
+      <li>Necesitas una API key válida de <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI</a>.</li>
+    </ol>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

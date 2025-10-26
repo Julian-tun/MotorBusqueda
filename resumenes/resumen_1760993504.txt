@@ -1,0 +1,8 @@
+### Resumen breve
+El artículo analiza la implementación de herramientas de Inteligencia Artificial (IA), como ChatGPT y Perplexity, en la enseñanza de estructuras de control en programación en estudiantes de ingeniería en el Instituto Tecnológico de Minatitlán. El objetivo fue evaluar la efectividad de estas herramientas en el aprendizaje del lenguaje C, encontrando que un 91% de los estudiantes las utilizó, mejorando su comprensión de conceptos complejos y la personalización del aprendizaje. Sin embargo, se identificaron limitaciones como la dependencia de conocimientos previos y la necesidad de formular preguntas claras.
+
+### Metodología
+La investigación adoptó un enfoque mixto, combinando métodos cuantitativos y cualitativos. Se realizó un estudio descriptivo con una muestra intencionada de 22 estudiantes de ingeniería electrónica, utilizando encuestas estructuradas y observaciones de sus interacciones con IA para evaluar su percepción y la utilidad en el aprendizaje de programación en C. Se recogieron datos sobre la efectividad, áreas de impacto y los desafíos que enfrentaron en el uso de la IA para resolver dudas y generar contenido educativo.
+
+### Conclusión
+Los resultados indicaron que la IA puede ser un recurso valioso en la educación superior tecnológica, sobre todo en el aprendizaje de programación, al facilitar la comprensión de conceptos y la corrección de errores. A pesar de las limitaciones identificadas, como la necesidad de conocimientos básicos y la formulación de preguntas claras, la experiencia demostró que la IA tiene un gran potencial como tutor virtual, contribuyendo de manera efectiva al desarrollo de competencias técnicas y cognitivas en los estudiantes.
