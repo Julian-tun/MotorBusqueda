@@ -1,6 +1,6 @@
 <?php
 return [
-    'uri' => 'mongodb://127.0.0.1:27017',
+    'uri' => 'mongodb+srv://juliantunortiz_db_user:LvUDo8TlnxQ4Sqd0@cluster0.fdqifn8.mongodb.net/motorbusqueda?retryWrites=true&w=majority',
     'db' => 'motorbusqueda',
     'collection' => 'resumenes_cache'
 ];
