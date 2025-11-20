@@ -1,89 +1,137 @@
-/* Estilo moderno y limpio */
-body {
-  font-family: 'Segoe UI', Roboto, sans-serif;
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 20px;
-  background: #f5f7fa;
-  color: #222;
+/* 🎓 Estilo moderno, profesional y limpio */
+:root {
+  --primary: #0b74de;
+  --primary-dark: #095bb5;
+  --accent: #28a745;
+  --accent-dark: #1e7e34;
+  --bg: #f3f6fa;
+  --card-bg: #ffffff;
+  --text: #222;
+  --text-light: #555;
+  --border: #d0d7de;
+  --shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
 }
 
+body {
+  font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 30px 20px;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+}
+
+/* ---------- HEADER ---------- */
 header {
   text-align: center;
-  margin-bottom: 24px;
+  margin-bottom: 30px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid var(--primary);
+  animation: fadeInDown 0.6s ease;
 }
 
 h1 {
-  font-size: 1.8rem;
-  color: #0b74de;
+  font-size: 2rem;
+  color: var(--primary);
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
 }
 
-p {
-  color: #444;
+header p {
+  color: var(--text-light);
+  font-size: 1rem;
 }
 
+/* ---------- CONTROLS ---------- */
 .controls {
-  margin-bottom: 20px;
+  margin-bottom: 25px;
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: var(--shadow);
+  animation: fadeInUp 0.6s ease;
 }
 
 .search-box, .key-box {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
-  margin-bottom: 12px;
+  margin-bottom: 15px;
 }
 
 input[type=text], select {
   flex: 1;
-  padding: 10px;
-  border: 1px solid #ccc;
+  padding: 12px;
+  border: 1px solid var(--border);
   border-radius: 8px;
   font-size: 1rem;
+  outline: none;
+  transition: border 0.2s, box-shadow 0.2s;
+  background-color: #fff;
+}
+
+input[type=text]:focus, select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 4px rgba(11, 116, 222, 0.3);
 }
 
 button {
-  padding: 10px 16px;
+  padding: 12px 18px;
   border-radius: 8px;
   border: none;
-  background: #0b74de;
-  color: white;
-  font-weight: bold;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.25s, transform 0.15s;
 }
 
 button:hover {
-  background: #095bb5;
+  background: var(--primary-dark);
+  transform: translateY(-1px);
 }
 
+/* ---------- RESULTADOS ---------- */
 .result {
-  background: #fff;
-  border-radius: 10px;
-  padding: 16px;
-  margin: 16px 0;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 18px 0;
+  box-shadow: var(--shadow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.result:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
 }
 
 .result h2 {
-  margin: 0 0 6px;
-  font-size: 1.2rem;
+  margin: 0 0 8px;
+  font-size: 1.25rem;
+  color: var(--primary-dark);
 }
 
 .meta {
   font-size: 0.9rem;
-  color: #666;
-  margin-bottom: 8px;
+  color: #777;
+  margin-bottom: 10px;
 }
 
 .abstract {
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   color: #333;
+  font-size: 0.95rem;
 }
 
 .summ {
-  background: #f0f4fa;
-  padding: 10px;
+  background: #eef4fc;
+  padding: 12px;
   border-radius: 8px;
   font-size: 0.95rem;
+  line-height: 1.5;
+  border-left: 4px solid var(--primary);
 }
 
 pre {
@@ -91,63 +139,104 @@ pre {
   font-family: inherit;
 }
 
+/* ---------- ESTADOS ---------- */
 .loading {
   text-align: center;
   color: #666;
+  font-style: italic;
+  margin-top: 20px;
 }
 
 .error {
   color: #c00;
   font-weight: bold;
+  background: #ffe5e5;
+  padding: 10px;
+  border-radius: 8px;
+  text-align: center;
+  border: 1px solid #ffb3b3;
 }
 
-/* Botones de paginación y descarga */
+/* ---------- PAGINACIÓN ---------- */
 .pagination {
   display: flex;
   gap: 10px;
   justify-content: center;
-  margin: 16px 0;
+  margin: 20px 0;
 }
 
 .pagination button {
   padding: 10px 16px;
   border-radius: 8px;
   border: none;
-  background: #0b74de;
+  background: var(--primary);
   color: white;
   font-weight: bold;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.2s, transform 0.1s;
 }
 
 .pagination button:hover {
-  background: #095bb5;
+  background: var(--primary-dark);
+  transform: translateY(-1px);
 }
 
+/* ---------- ACCIONES ---------- */
 .actions {
-  margin-top: 12px;
+  margin-top: 15px;
 }
 
 .actions .btn {
   display: inline-block;
   text-decoration: none;
-  padding: 8px 12px;
+  padding: 9px 14px;
   border-radius: 6px;
   margin-right: 6px;
-  background: #0b74de;
+  background: var(--primary);
   color: white;
-  font-weight: bold;
-  transition: background 0.2s;
+  font-weight: 600;
+  transition: background 0.25s, transform 0.15s;
 }
 
 .actions .btn:hover {
-  background: #095bb5;
+  background: var(--primary-dark);
+  transform: translateY(-1px);
 }
 
 .actions .linkBtn {
-  background: #28a745;
+  background: var(--accent);
 }
 
 .actions .linkBtn:hover {
-  background: #1e7e34;
+  background: var(--accent-dark);
+}
+
+/* ---------- FOOTER ---------- */
+footer {
+  margin-top: 40px;
+  font-size: 0.9rem;
+  color: #666;
+  border-top: 1px solid #ddd;
+  padding-top: 15px;
+}
+
+footer a {
+  color: var(--primary-dark);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+footer a:hover {
+  text-decoration: underline;
+}
+
+/* ---------- ANIMACIONES ---------- */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }

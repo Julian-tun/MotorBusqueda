@@ -3,9 +3,26 @@ error_reporting(E_ALL);
 ini_set('display_errors', 0); // No mostrar warnings
 header("Content-Type: application/json");
 
+require 'mongo.php'; // ✅ Importar conexión MongoDB
+
 $url = $_GET['url'] ?? null;
 if (!$url) {
     echo json_encode(["error" => "No se recibió URL"]);
+    exit;
+}
+
+// ✅ Generar un ID único basado en la URL (sirve como "paperId")
+$paperId = md5($url);
+$titulo = basename($url); // puedes mejorarlo si tienes el título real
+
+// ✅ 1. Verificar si el resumen ya está guardado en MongoDB
+$resumenCache = obtenerResumenCache($paperId);
+if ($resumenCache) {
+    echo json_encode([
+        "mensaje" => "✅ Resumen en caché encontrado",
+        "resumen" => $resumenCache['resumen'],
+        "fuente" => "MongoDB"
+    ]);
     exit;
 }
 
@@ -27,17 +44,15 @@ if ($err || $http != 200 || !$pdfContent) {
 
 file_put_contents($temp, $pdfContent);
 
-// Convertir PDF a texto usando `pdftotext` (si lo tienes instalado) o extraer texto básico
+// Convertir PDF a texto
 $text = '';
 if (file_exists('/usr/bin/pdftotext') || file_exists('C:\\xpdf\\pdftotext.exe')) {
-    // Linux o Windows con pdftotext instalado
     $txtFile = "temp_" . time() . ".txt";
     $cmd = "pdftotext " . escapeshellarg($temp) . " " . escapeshellarg($txtFile);
     exec($cmd);
     $text = @file_get_contents($txtFile);
     @unlink($txtFile);
 } else {
-    // Alternativa: solo texto básico (limitado)
     $text = "(PDF descargado, pero no se pudo extraer texto completo, se usará un resumen parcial)";
 }
 unlink($temp);
@@ -45,7 +60,7 @@ unlink($temp);
 // Limitar texto si es muy grande
 $text = substr($text, 0, 15000);
 
-// Generar resumen con OpenAI (recomendado)
+// Generar resumen con OpenAI
 $apiKey = $_GET['apiKey'] ?? '';
 if (!$apiKey) {
     echo json_encode(["error" => "Falta API Key de OpenAI"]);
@@ -90,12 +105,17 @@ if ($err) {
 $json = json_decode($response, true);
 $resumen = $json['choices'][0]['message']['content'] ?? "(No se pudo generar resumen)";
 
-// Guardar archivo resumen
+// Guardar archivo resumen local
 if (!is_dir("resumenes")) mkdir("resumenes");
 $resumenFile = "resumenes/resumen_" . time() . ".txt";
 file_put_contents($resumenFile, $resumen);
 
+// ✅ 2. Guardar resumen en MongoDB
+guardarResumenCache($paperId, $titulo, $resumen);
+
 echo json_encode([
+    "mensaje" => "🧠 Resumen generado y guardado en MongoDB",
     "resumen" => $resumen,
-    "archivoResumen" => $resumenFile
+    "archivoResumen" => $resumenFile,
+    "fuente" => "OpenAI + guardado en NoSQL"
 ]);
