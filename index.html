@@ -8,33 +8,47 @@
 </head>
 <body>
   <header>
-    <h1>🔎 Motor de búsqueda científico</h1>
-    <p>Busca artículos académicos y obtén un resumen, metodología y conclusión generados por IA (OpenAI).</p>
+    <div class="header-content">
+      <h1>🔎 Motor de búsqueda científico</h1>
+      <p>Busca artículos académicos y obtén un resumen, metodología y conclusión generados por <strong>IA</strong> (OpenAI).</p>
+    </div>
   </header>
 
   <section class="controls">
-    <div class="search-box">
-      <input id="query" type="text" placeholder="Ej: machine learning medical imaging">
+    <div class="search-box card">
+      <input id="query" type="text" placeholder="Ejemplo: inteligencia artificial en educación">
       <button id="searchBtn">Buscar</button>
     </div>
 
-    <div class="key-box">
-      <input id="openaiKey" type="text" placeholder="OpenAI API Key (Bearer)">
+    <div class="key-box card">
+      <input id="openaiKey" type="text" placeholder="🔐 OpenAI API Key (Bearer)">
       <select id="modelSelect">
-        <option value="gpt-4o-mini">gpt-4o-mini (rápido y barato)</option>
-        <option value="gpt-4o">gpt-4o (más potente)</option>
+        <option value="gpt-4o-mini">gpt-4o-mini (rápido y económico)</option>
+        <option value="gpt-4o">gpt-4o (más preciso)</option>
       </select>
     </div>
   </section>
 
-  <main id="results"></main>
+  <main id="results" class="results-container"></main>
 
   <footer>
-    <p><strong>Notas:</strong></p>
+    <p><strong>Notas importantes:</strong></p>
     <ol>
-      <li>Usa la API gratuita de Semantic Scholar para obtener artículos.</li>
-      <li>Necesitas una API key válida de <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI</a>.</li>
+      <li>🔹 Usa la API gratuita de <a href="https://www.semanticscholar.org/product/api" target="_blank">Semantic Scholar</a> para obtener artículos.</li>
+      <li>🔹 Necesitas una clave válida de <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI</a>.</li>
     </ol>
+    <p class="credit">
+      <strong>Desarrollado por: </strong><br>
+     🔹 Julian David Tun Ortiz<br>
+     🔹 Jose Eduardo Puc Dzib<br>
+     🔹 Sergio Efrain Chuc Keb<br>
+     🔹 Adair Emmanuel<br>
+     🔹 Arlan Suaste<br>
+     🔹 Joseimy Basulto<br>
+     🔹 Edgar Uriel<br>
+      — Proyecto académico —
+    </p>
+
   </footer>
 
   <script src="script.js"></script>
