@@ -5,8 +5,8 @@ $config = require __DIR__ . '/config_mongo.php';
 use MongoDB\Client;
 use MongoDB\Exception\Exception;
 
-/**
- * Obtiene la colección configurada en MongoDB.
+/*
+ * en esgta parte del codigo obtiene la colección configurada en MongoDB.
  */
 function getMongoCollection() {
     global $config;

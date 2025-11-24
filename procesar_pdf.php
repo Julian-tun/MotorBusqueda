@@ -25,7 +25,7 @@ if (!isset($_FILES['pdfFile']) || $_FILES['pdfFile']['error'] !== 0) {
 // Validar API Key y modelo
 $apiKey = $_POST['apiKey'] ?? '';
 $model  = $_POST['model'] ?? 'gpt-4o-mini';
-if (!$apiKey) json_error("Falta API Key de OpenAI");
+if (!$apiKey) json_error(msg: "Falta API Key de OpenAI");
 
 // Incluir MongoDB
 $mongoLoaded = false;
@@ -65,7 +65,7 @@ if (trim($text) === '') {
     json_error("El PDF no contiene texto legible para procesar");
 }
 
-// Generar ID único para cache (hash MD5 del contenido)
+// Generar ID único para cache
 $paperId = md5($text);
 
 // Revisar cache en MongoDB
@@ -76,7 +76,8 @@ if ($mongoLoaded) {
         echo json_encode([
             "mensaje" => "✅ Resumen encontrado en cache (MongoDB)",
             "resumen" => $resumenCache['resumen'],
-            "archivoResumen" => null,
+            "paperId" => $paperId,
+            "archivoResumen" => "descargar_resumen.php?paperId=$paperId",
             "fuente" => "MongoDB"
         ]);
         exit;
@@ -84,13 +85,13 @@ if ($mongoLoaded) {
 }
 
 // Preparar prompt para OpenAI
-$prompt = "Eres un asistente experto en resumir artículos científicos. Analiza el PDF y genera un resumen completo,debes incluir:
+$prompt = "Eres un asistente experto en resumir artículos científicos. Analiza el PDF y genera un resumen completo, debes incluir:
 
 1. Resumen: sé más extenso si hay mucho contenido y conciso si es poco.
 2. Metodología: describe claramente cómo se realizó el estudio.
 3. Conclusión: presenta los hallazgos principales y relevancia del estudio.
 
-si en el articulo no encuentras algo similar a una Metodologia entonces  no incluyas metodologia solo resumen y conclusion
+Si en el artículo no encuentras algo similar a una Metodología entonces no incluyas metodología, solo resumen y conclusión.
 
 Texto del artículo:
 $text";
@@ -134,6 +135,9 @@ ob_end_clean();
 echo json_encode([
     "mensaje" => "🧠 Resumen generado y guardado en MongoDB",
     "resumen" => $resumen,
+    "paperId" => $paperId,
+    "archivoResumen" => "descargar_resumen.php?paperId=$paperId",
     "fuente" => $mongoLoaded ? "OpenAI + MongoDB" : "OpenAI"
 ]);
+
 exit;

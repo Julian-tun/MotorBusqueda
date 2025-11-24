@@ -36,7 +36,7 @@ curl_setopt_array($ch, [
     ],
     CURLOPT_TIMEOUT => 90,          // hasta 90 segundos totales
     CURLOPT_CONNECTTIMEOUT => 15,   // 15 segundos para conectar
-    CURLOPT_SSL_VERIFYPEER => true,
+    CURLOPT_SSL_VERIFYPEER => true, // aquui protejemos contra ataques  MITM
 ]);
 
 $response = curl_exec($ch);
