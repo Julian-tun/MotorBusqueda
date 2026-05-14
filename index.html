@@ -3,53 +3,75 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Motor de búsqueda científico</title>
+  <title>ResearchFlow AI | Investigación científica con IA</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <div class="header-content">
-      <h1>🔎 Motor de búsqueda científico</h1>
-      <p>Busca artículos académicos y obtén un resumen, metodología y conclusión generados por <strong>IA</strong> (OpenAI).</p>
-    </div>
-  </header>
+  <div class="page-shell">
+    <header class="hero">
+      <nav class="topbar">
+        <div class="brand">
+          <div class="logo-slot" aria-label="Espacio para logo futuro">
+            <span>LOGO</span>
+          </div>
+          <div>
+            <strong>ResearchFlow AI</strong>
+            <small>Scientific Research Assistant</small>
+          </div>
+        </div>
+        <a class="nav-link" href="subir_pdf.php">Subir PDF</a>
+      </nav>
 
-  <section class="controls">
-    <div class="search-box card">
-      <input id="query" type="text" placeholder="Ejemplo: inteligencia artificial en educación">
-      <button id="searchBtn">Buscar</button>
-    </div>
+      <section class="hero-grid">
+        <div class="hero-copy">
+          <span class="eyebrow">Búsqueda académica + IA generativa</span>
+          <h1>Encuentra artículos científicos, revisa su abstract y resume el PDF completo cuando lo necesites.</h1>
+          <p>Una experiencia profesional para investigación: búsqueda rápida, lectura asistida y síntesis estructurada sin pedirle API Keys al usuario.</p>
 
-    <div class="key-box card">
-      <input id="openaiKey" type="text" placeholder="🔐 OpenAI API Key (Bearer)">
-      <select id="modelSelect">
-        <option value="gpt-4o-mini">gpt-4o-mini (rápido y económico)</option>
-        <option value="gpt-4o">gpt-4o (más preciso)</option>
-      </select>
-    </div>
-  </section>
+          <div class="search-panel">
+            <label for="query">Tema de investigación</label>
+            <div class="search-row">
+              <input id="query" type="text" placeholder="Ejemplo: inteligencia artificial en educación" autocomplete="off">
+              <button id="searchBtn">Buscar artículos</button>
+            </div>
+            <div class="quick-topics" aria-label="Temas sugeridos">
+              <button type="button" data-topic="machine learning in education">Machine learning</button>
+              <button type="button" data-topic="climate change health impact">Cambio climático</button>
+              <button type="button" data-topic="cybersecurity artificial intelligence">Ciberseguridad</button>
+            </div>
+          </div>
+        </div>
 
-  <main id="results" class="results-container"></main>
+        <aside class="hero-card">
+          <div class="metric"><span>01</span><p>Busca literatura científica en Semantic Scholar.</p></div>
+          <div class="metric"><span>02</span><p>Lee abstract, autores, año y enlace original.</p></div>
+          <div class="metric"><span>03</span><p>Genera resúmenes completos con IA desde el servidor.</p></div>
+        </aside>
+      </section>
+    </header>
 
-  <footer>
-    <p><strong>Notas importantes:</strong></p>
-    <ol>
-      <li>🔹 Usa la API gratuita de <a href="https://www.semanticscholar.org/product/api" target="_blank">Semantic Scholar</a> para obtener artículos.</li>
-      <li>🔹 Necesitas una clave válida de <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI</a>.</li>
-    </ol>
-    <p class="credit">
-      <strong>Desarrollado por: </strong><br>
-     🔹 Julian David Tun Ortiz<br>
-     🔹 Jose Eduardo Puc Dzib<br>
-     🔹 Sergio Efrain Chuc Keb<br>
-     🔹 Adair Emmanuel<br>
-     🔹 Arlan Suaste<br>
-     🔹 Joseimy Basulto<br>
-     🔹 Edgar Uriel<br>
-      — Proyecto académico —
-    </p>
+    <section class="status-strip">
+      <div><strong>Sin API Key del usuario</strong><span>La clave se protege en el backend.</span></div>
+      <div><strong>PDF completo</strong><span>Resume artículos open access.</span></div>
+      <div><strong>Caché MongoDB</strong><span>Evita reprocesar resúmenes.</span></div>
+    </section>
 
-  </footer>
+    <main>
+      <section class="results-head">
+        <div>
+          <span class="eyebrow">Resultados</span>
+          <h2>Artículos encontrados</h2>
+        </div>
+        <p id="resultCount">Realiza una búsqueda para comenzar.</p>
+      </section>
+      <section id="results" class="results-container"></section>
+    </main>
+
+    <footer class="site-footer">
+      <p><strong>ResearchFlow AI</strong> — Proyecto académico JoPPI 2026.</p>
+      <p>Desarrollado por Los .....</p>
+    </footer>
+  </div>
 
   <script src="script.js"></script>
 </body>
