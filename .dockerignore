@@ -1,0 +1,6 @@
+.git
+.github
+.env
+config_private.php
+config_mongo.php
+vendor/
