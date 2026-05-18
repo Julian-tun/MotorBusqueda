@@ -7,6 +7,23 @@ use MongoDB\Exception\Exception;
 $configPath = __DIR__ . '/config_mongo.php';
 $config = file_exists($configPath) ? require $configPath : [];
 
+// Variables de entorno para Azure/Docker
+$envMongoUri = getenv('MONGO_URI');
+$envMongoDb = getenv('MONGO_DB');
+$envMongoCollection = getenv('MONGO_COLLECTION');
+
+if ($envMongoUri !== false && trim($envMongoUri) !== '') {
+    $config['uri'] = trim($envMongoUri);
+}
+
+if ($envMongoDb !== false && trim($envMongoDb) !== '') {
+    $config['db'] = trim($envMongoDb);
+}
+
+if ($envMongoCollection !== false && trim($envMongoCollection) !== '') {
+    $config['collection'] = trim($envMongoCollection);
+}
+
 function getMongoCollection() {
     global $config;
 
@@ -20,7 +37,7 @@ function getMongoCollection() {
     $collectionName = $config['collection'] ?? null;
 
     if (empty($uri) || empty($dbName) || empty($collectionName)) {
-        error_log('Configuración incompleta de MongoDB. Revisa uri, db y collection.');
+        error_log('Configuración incompleta de MongoDB. Revisa MONGO_URI, MONGO_DB y MONGO_COLLECTION.');
         return null;
     }
 

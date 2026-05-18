@@ -8,15 +8,40 @@ function json_response($payload, $code = 200) {
 
 function app_config() {
     static $config = null;
+
     if ($config === null) {
         $config = require __DIR__ . '/config_app.php';
+
+        // Variables de entorno para despliegue en Azure/Docker
+        $envOpenAiKey = getenv('OPENAI_API_KEY');
+        $envSemanticKey = getenv('SEMANTIC_SCHOLAR_API_KEY');
+        $envOpenAiModel = getenv('OPENAI_MODEL');
+        $envOpenAiUrl = getenv('OPENAI_URL');
+
+        if ($envOpenAiKey !== false && trim($envOpenAiKey) !== '') {
+            $config['openai_api_key'] = trim($envOpenAiKey);
+        }
+
+        if ($envSemanticKey !== false && trim($envSemanticKey) !== '') {
+            $config['semantic_scholar_api_key'] = trim($envSemanticKey);
+        }
+
+        if ($envOpenAiModel !== false && trim($envOpenAiModel) !== '') {
+            $config['openai_model'] = trim($envOpenAiModel);
+        }
+
+        if ($envOpenAiUrl !== false && trim($envOpenAiUrl) !== '') {
+            $config['openai_url'] = trim($envOpenAiUrl);
+        }
     }
+
     return $config;
 }
 
 function call_openai_chat($messages, $model = null, $temperature = 0.25) {
     $config = app_config();
     $apiKey = trim($config['openai_api_key'] ?? '');
+
     if ($apiKey === '') {
         return [
             'ok' => false,
@@ -55,6 +80,7 @@ function call_openai_chat($messages, $model = null, $temperature = 0.25) {
     }
 
     $json = json_decode($response, true);
+
     if ($httpCode < 200 || $httpCode >= 300) {
         $detail = $json['error']['message'] ?? $response;
         return ['ok' => false, 'status' => $httpCode, 'error' => 'La IA respondió con HTTP ' . $httpCode, 'details' => $detail];
@@ -65,6 +91,7 @@ function call_openai_chat($messages, $model = null, $temperature = 0.25) {
     }
 
     $content = $json['choices'][0]['message']['content'] ?? '';
+
     if (trim($content) === '') {
         return ['ok' => false, 'status' => 502, 'error' => 'La IA no devolvió contenido.'];
     }
