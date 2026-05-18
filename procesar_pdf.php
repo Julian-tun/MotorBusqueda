@@ -12,6 +12,52 @@ if (!isset($_FILES['pdfFile']) || $_FILES['pdfFile']['error'] !== 0) {
     json_response(['error' => 'No se recibió el PDF correctamente.'], 400);
 }
 
+
+function extraerTextoPdfSeguro($pdfPath) {
+    if (!is_file($pdfPath)) {
+        return ['ok' => false, 'text' => '', 'error' => 'El archivo PDF no existe.'];
+    }
+
+    // Primero usamos Poppler/pdftotext porque consume mucha menos memoria que PDFParser.
+    $cmd = 'pdftotext -layout -enc UTF-8 ' . escapeshellarg($pdfPath) . ' - 2>&1';
+    $output = shell_exec($cmd);
+    if (is_string($output)) {
+        $text = trim($output);
+        $lower = strtolower($text);
+        $pareceError = str_contains($lower, 'syntax error') || str_contains($lower, 'command not found') || str_contains($lower, 'error:');
+        if ($text !== '' && !$pareceError && mb_strlen($text, 'UTF-8') > 80) {
+            return ['ok' => true, 'text' => $text, 'error' => null];
+        }
+    }
+
+    // Respaldo controlado: PDFParser solo en PDFs pequeños para evitar agotar memoria en Render.
+    $size = filesize($pdfPath) ?: 0;
+    if ($size > 6 * 1024 * 1024) {
+        return [
+            'ok' => false,
+            'text' => '',
+            'error' => 'No se pudo extraer texto con pdftotext y el PDF es demasiado pesado para usar PDFParser sin agotar memoria.'
+        ];
+    }
+
+    if (!file_exists(__DIR__ . '/vendor/autoload.php')) {
+        return ['ok' => false, 'text' => '', 'error' => 'No se encontró vendor/autoload.php. Ejecuta composer install.'];
+    }
+
+    try {
+        require_once __DIR__ . '/vendor/autoload.php';
+        $parser = new \Smalot\PdfParser\Parser();
+        $pdf = $parser->parseFile($pdfPath);
+        $text = trim($pdf->getText());
+        if ($text !== '') {
+            return ['ok' => true, 'text' => $text, 'error' => null];
+        }
+        return ['ok' => false, 'text' => '', 'error' => 'El PDF no contiene texto legible.'];
+    } catch (Throwable $e) {
+        return ['ok' => false, 'text' => '', 'error' => $e->getMessage()];
+    }
+}
+
 function normalizarTextoPdf($text) {
     $text = str_replace(["\r\n", "\r"], "\n", $text);
     $text = preg_replace('/[ \t]+/u', ' ', $text);
@@ -164,19 +210,11 @@ $model = app_config()['openai_model'] ?? 'gpt-4o-mini';
 $tempPdf = $_FILES['pdfFile']['tmp_name'];
 $title = pathinfo($_FILES['pdfFile']['name'] ?? 'PDF subido', PATHINFO_FILENAME);
 
-try {
-    if (!file_exists(__DIR__ . '/vendor/autoload.php')) {
-        json_response(['error' => 'No se encontró vendor/autoload.php. Ejecuta composer install.'], 500);
-    }
-
-    require_once __DIR__ . '/vendor/autoload.php';
-
-    $parser = new \Smalot\PdfParser\Parser();
-    $pdf = $parser->parseFile($tempPdf);
-    $text = $pdf->getText();
-} catch (Throwable $e) {
-    json_response(['error' => 'No se pudo extraer texto del PDF: ' . $e->getMessage()], 422);
+$extraccion = extraerTextoPdfSeguro($tempPdf);
+if (!$extraccion['ok']) {
+    json_response(['error' => 'No se pudo extraer texto del PDF: ' . $extraccion['error']], 422);
 }
+$text = $extraccion['text'];
 
 $config = app_config();
 $text = normalizarTextoPdf($text);
