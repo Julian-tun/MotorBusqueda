@@ -40,7 +40,7 @@ function call_openai_chat($messages, $model = null, $temperature = 0.25) {
             'Authorization: Bearer ' . $apiKey,
             'Content-Type: application/json'
         ],
-        CURLOPT_TIMEOUT => 120,
+        CURLOPT_TIMEOUT => 90,
         CURLOPT_CONNECTTIMEOUT => 15,
         CURLOPT_SSL_VERIFYPEER => true
     ]);

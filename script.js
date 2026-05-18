@@ -20,15 +20,13 @@ async function runSearch() {
   resultCount.textContent = 'Buscando artículos relevantes...';
 
   try {
-    const fields = 'paperId,title,authors,year,abstract,url,openAccessPdf,citationCount,venue';
-    const ssUrl = `https://api.semanticscholar.org/graph/v1/paper/search?query=${encodeURIComponent(q)}&limit=10&fields=${fields}`;
-    const ssResp = await fetch(ssUrl);
+    const ssResp = await fetch(`buscar_articulos.php?query=${encodeURIComponent(q)}&limit=10`);
+    const ssJson = await safeJson(ssResp);
 
-    if (!ssResp.ok) {
-      throw new Error(`Semantic Scholar respondió con HTTP ${ssResp.status}. Intenta nuevamente en unos segundos.`);
+    if (!ssResp.ok || ssJson.error) {
+      throw new Error(ssJson.error || `Semantic Scholar respondió con HTTP ${ssResp.status}. Intenta nuevamente en unos segundos.`);
     }
 
-    const ssJson = await ssResp.json();
     const papers = (ssJson.data || [])
       .filter(p => p.title && p.abstract && p.abstract.trim())
       .slice(0, 6);
@@ -55,6 +53,8 @@ function createPaperCard(p, index) {
   const authors = (p.authors || []).slice(0, 4).map(a => a.name).join(', ') || 'Autores no disponibles';
   const pdfUrl = p.openAccessPdf?.url || '';
   const originalUrl = p.url || pdfUrl || '#';
+  const puedeIntentarPdf = Boolean(pdfUrl || (p.url && p.url !== '#'));
+  const fullBtnText = pdfUrl ? 'Resumir PDF completo' : (puedeIntentarPdf ? 'Buscar PDF y resumir' : 'PDF no disponible');
   const citationText = Number.isFinite(p.citationCount) ? `${p.citationCount} citas` : 'Citas no disponibles';
 
   card.innerHTML = `
@@ -83,7 +83,7 @@ function createPaperCard(p, index) {
 
     <div class="actions">
       <a href="${escapeAttribute(originalUrl)}" target="_blank" rel="noopener" class="btn secondary">Ver artículo original</a>
-      <button class="btn fullBtn" ${pdfUrl ? '' : 'disabled'}>${pdfUrl ? 'Resumir PDF completo' : 'PDF no disponible'}</button>
+      <button class="btn fullBtn" ${puedeIntentarPdf ? '' : 'disabled'}>${escapeHtml(fullBtnText)}</button>
     </div>
 
     <div class="full-summary" hidden></div>
@@ -111,7 +111,7 @@ async function summarizeAbstract(p, card) {
     const data = await safeJson(resp);
     if (!resp.ok || data.error) throw new Error(data.error || 'No se pudo generar el resumen.');
     summBox.className = 'summ';
-    summBox.innerHTML = `<pre>${escapeHtml(data.resumen)}</pre>`;
+    summBox.innerHTML = `<pre>${escapeHtml(cleanSummaryText(data.resumen))}</pre>`;
   } catch (err) {
     summBox.className = 'summ error-inline';
     summBox.textContent = err.message;
@@ -126,7 +126,7 @@ async function summarizeFullPaper(p, card) {
   btn.disabled = true;
   target.hidden = false;
   target.className = 'full-summary loading-box';
-  target.textContent = 'Descargando PDF, extrayendo texto y generando resumen completo...';
+  target.textContent = 'Buscando el PDF real, descargando contenido y generando resumen completo...';
 
   try {
     const resp = await fetch('procesar_articulo.php', {
@@ -136,7 +136,9 @@ async function summarizeFullPaper(p, card) {
         paperId: p.paperId,
         title: p.title,
         abstract: p.abstract,
-        pdfUrl: p.openAccessPdf?.url || ''
+        pdfUrl: p.openAccessPdf?.url || '',
+        articleUrl: p.url || '',
+        doi: p.externalIds?.DOI || ''
       })
     });
     const data = await safeJson(resp);
@@ -145,7 +147,7 @@ async function summarizeFullPaper(p, card) {
     target.className = 'full-summary';
     target.innerHTML = `
       <div class="summary-header"><strong>Resumen completo del artículo</strong><span>${escapeHtml(data.fuente || 'IA')}</span></div>
-      <pre>${escapeHtml(data.resumen)}</pre>
+      <pre>${escapeHtml(cleanSummaryText(data.resumen))}</pre>
       ${data.archivoResumen ? `<a class="btn secondary" href="${escapeAttribute(data.archivoResumen)}">Descargar resumen</a>` : ''}
     `;
   } catch (err) {
@@ -168,6 +170,17 @@ function renderSkeletons() {
       <div class="line short"></div><div class="line title"></div><div class="line"></div><div class="line"></div>
     </div>
   `).join('');
+}
+
+function cleanSummaryText(str) {
+  return String(str ?? '')
+    .replace(/^#{1,6}\s*/gm, '')
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/__(.*?)__/g, '$1')
+    .replace(/^\s*-\s+/gm, '• ')
+    .replace(/^\s*\*\s+/gm, '• ')
+    .replace(/`/g, '')
+    .trim();
 }
 
 function showToast(message) { alert(message); }
