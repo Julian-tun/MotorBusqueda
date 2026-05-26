@@ -6,6 +6,7 @@ use MongoDB\Exception\Exception;
 
 $configPath = __DIR__ . '/config_mongo.php';
 $config = file_exists($configPath) ? require $configPath : [];
+$ultimoErrorMongo = null;
 
 // Variables de entorno para Azure/Docker
 $envMongoUri = getenv('MONGO_URI');
@@ -24,11 +25,22 @@ if ($envMongoCollection !== false && trim($envMongoCollection) !== '') {
     $config['collection'] = trim($envMongoCollection);
 }
 
+function setUltimoErrorMongo($mensaje) {
+    global $ultimoErrorMongo;
+    $ultimoErrorMongo = $mensaje;
+    error_log($mensaje);
+}
+
+function getUltimoErrorMongo() {
+    global $ultimoErrorMongo;
+    return $ultimoErrorMongo;
+}
+
 function getMongoCollection() {
     global $config;
 
     if (!is_array($config)) {
-        error_log('config_mongo.php no devolvió un array válido.');
+        setUltimoErrorMongo('config_mongo.php no devolvió un array válido.');
         return null;
     }
 
@@ -37,7 +49,7 @@ function getMongoCollection() {
     $collectionName = $config['collection'] ?? null;
 
     if (empty($uri) || empty($dbName) || empty($collectionName)) {
-        error_log('Configuración incompleta de MongoDB. Revisa MONGO_URI, MONGO_DB y MONGO_COLLECTION.');
+        setUltimoErrorMongo('Configuración incompleta de MongoDB. Revisa MONGO_URI, MONGO_DB y MONGO_COLLECTION.');
         return null;
     }
 
@@ -46,15 +58,29 @@ function getMongoCollection() {
         $db = $client->selectDatabase($dbName);
         return $db->selectCollection($collectionName);
     } catch (Exception $e) {
-        error_log('Error de conexión a MongoDB: ' . $e->getMessage());
+        setUltimoErrorMongo('Error de conexión a MongoDB: ' . $e->getMessage());
         return null;
     } catch (Throwable $e) {
-        error_log('Error inesperado en MongoDB: ' . $e->getMessage());
+        setUltimoErrorMongo('Error inesperado en MongoDB: ' . $e->getMessage());
         return null;
     }
 }
 
 function guardarResumenCache($paperId, $titulo, $resumen) {
+    $paperId = trim((string)$paperId);
+    $titulo = trim((string)$titulo);
+    $resumen = trim((string)$resumen);
+
+    if ($paperId === '') {
+        setUltimoErrorMongo('No se puede guardar en MongoDB: paperId vacío.');
+        return false;
+    }
+
+    if ($resumen === '') {
+        setUltimoErrorMongo('No se puede guardar en MongoDB: resumen vacío.');
+        return false;
+    }
+
     $col = getMongoCollection();
 
     if (!$col) {
@@ -69,7 +95,11 @@ function guardarResumenCache($paperId, $titulo, $resumen) {
                     'paperId' => $paperId,
                     'titulo' => $titulo,
                     'resumen' => $resumen,
-                    'fecha_generacion' => date('c')
+                    'fecha_generacion' => date('c'),
+                    'updated_at' => new MongoDB\BSON\UTCDateTime()
+                ],
+                '$setOnInsert' => [
+                    'created_at' => new MongoDB\BSON\UTCDateTime()
                 ]
             ],
             ['upsert' => true]
@@ -77,10 +107,10 @@ function guardarResumenCache($paperId, $titulo, $resumen) {
 
         return true;
     } catch (Exception $e) {
-        error_log('Error al guardar resumen: ' . $e->getMessage());
+        setUltimoErrorMongo('Error al guardar resumen: ' . $e->getMessage());
         return false;
     } catch (Throwable $e) {
-        error_log('Error inesperado al guardar resumen: ' . $e->getMessage());
+        setUltimoErrorMongo('Error inesperado al guardar resumen: ' . $e->getMessage());
         return false;
     }
 }
@@ -95,10 +125,10 @@ function obtenerResumenCache($paperId) {
     try {
         return $col->findOne(['paperId' => $paperId]);
     } catch (Exception $e) {
-        error_log('Error al obtener resumen: ' . $e->getMessage());
+        setUltimoErrorMongo('Error al obtener resumen: ' . $e->getMessage());
         return null;
     } catch (Throwable $e) {
-        error_log('Error inesperado al obtener resumen: ' . $e->getMessage());
+        setUltimoErrorMongo('Error inesperado al obtener resumen: ' . $e->getMessage());
         return null;
     }
 }

@@ -291,15 +291,24 @@ if (!$result['ok']) {
 }
 
 $resumen = $result['content'];
+$mongoGuardado = false;
+$mongoError = null;
 
 if ($mongoLoaded) {
-    guardarResumenCache($paperId, $title, $resumen);
+    $mongoGuardado = guardarResumenCache($paperId, $title, $resumen);
+    if (!$mongoGuardado && function_exists('getUltimoErrorMongo')) {
+        $mongoError = getUltimoErrorMongo();
+    }
 }
 
 json_response([
-    'mensaje' => 'Resumen generado correctamente.',
+    'mensaje' => $mongoGuardado
+        ? 'Resumen generado y guardado correctamente.'
+        : 'Resumen generado, pero NO se pudo guardar en MongoDB.',
     'resumen' => $resumen,
     'paperId' => $paperId,
-    'archivoResumen' => 'descargar_resumen.php?paperId=' . urlencode($paperId),
-    'fuente' => $mongoLoaded ? 'OpenAI + MongoDB' : 'OpenAI'
+    'archivoResumen' => $mongoGuardado ? 'descargar_resumen.php?paperId=' . urlencode($paperId) : null,
+    'fuente' => $mongoGuardado ? 'OpenAI + MongoDB' : 'OpenAI',
+    'mongoGuardado' => $mongoGuardado,
+    'mongoError' => $mongoError
 ]);

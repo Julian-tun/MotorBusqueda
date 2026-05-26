@@ -485,14 +485,33 @@ if (!$result['ok']) {
 }
 
 $resumen = $result['content'];
+$mongoGuardado = false;
+$mongoError = null;
+
 if ($mongoLoaded) {
-    guardarResumenCache($cachePaperId, $title, $resumen);
+    // Se guarda con el ID de caché, que es el que usa el botón "Descargar resumen".
+    $mongoGuardado = guardarResumenCache($cachePaperId, $title, $resumen);
+
+    // También se guarda una copia/alias con el paperId original de Semantic Scholar.
+    // Así no falla si alguna parte del frontend o una prueba manual descarga usando el paperId visible.
+    if ($mongoGuardado && $paperId !== $cachePaperId) {
+        guardarResumenCache($paperId, $title, $resumen);
+    }
+
+    if (!$mongoGuardado && function_exists('getUltimoErrorMongo')) {
+        $mongoError = getUltimoErrorMongo();
+    }
 }
 
 json_response([
-    'mensaje' => 'Resumen completo generado correctamente.',
+    'mensaje' => $mongoGuardado
+        ? 'Resumen completo generado y guardado correctamente.'
+        : 'Resumen completo generado, pero NO se pudo guardar en MongoDB.',
     'resumen' => $resumen,
     'paperId' => $paperId,
-    'archivoResumen' => 'descargar_resumen.php?paperId=' . urlencode($cachePaperId),
-    'fuente' => $mongoLoaded ? 'OpenAI + MongoDB' : 'OpenAI'
+    'cachePaperId' => $cachePaperId,
+    'archivoResumen' => $mongoGuardado ? 'descargar_resumen.php?paperId=' . urlencode($cachePaperId) : null,
+    'fuente' => $mongoGuardado ? 'OpenAI + MongoDB' : 'OpenAI',
+    'mongoGuardado' => $mongoGuardado,
+    'mongoError' => $mongoError
 ]);
