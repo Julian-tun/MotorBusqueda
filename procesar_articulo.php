@@ -26,27 +26,6 @@ if ($pdfUrl === '' && $articleUrl === '' && $doi === '') {
     json_response(['error' => 'Este resultado no tiene PDF directo ni página del artículo para buscar el PDF.'], 400);
 }
 
-// Se usa una versión nueva de caché para no devolver resúmenes antiguos generados
-// con la lógica anterior que solo tomaba el inicio del PDF.
-$cachePaperId = 'full_sections_v3_clean_publisher_' . md5($paperId . '|' . $pdfUrl . '|' . $articleUrl . '|' . $doi);
-
-$mongoLoaded = false;
-if (file_exists(__DIR__ . '/mongo.php')) {
-    require_once __DIR__ . '/mongo.php';
-    $mongoLoaded = true;
-    $cached = obtenerResumenCache($cachePaperId);
-    if ($cached && isset($cached['resumen']) && trim($cached['resumen']) !== '') {
-        json_response([
-            'mensaje' => 'Resumen encontrado en caché.',
-            'resumen' => $cached['resumen'],
-            'paperId' => $paperId,
-            'archivoResumen' => 'descargar_resumen.php?paperId=' . urlencode($cachePaperId),
-            'fuente' => 'MongoDB'
-        ]);
-    }
-}
-
-
 function extraerTextoPdfSeguro($pdfPath) {
     if (!is_file($pdfPath)) {
         return ['ok' => false, 'text' => '', 'error' => 'El archivo PDF no existe.'];
@@ -441,6 +420,28 @@ if (trim($contextoImportante) === '') {
     json_response(['error' => 'No se pudo construir contexto suficiente del PDF para resumir.'], 422);
 }
 
+// MISMA ESTRUCTURA QUE procesar_pdf.php:
+// el ID se crea con el título + el contexto real extraído del PDF,
+// se busca caché con ese mismo ID, se guarda con ese mismo ID
+// y se descarga con ese mismo ID.
+$paperId = 'pdf_upload_sections_v1_' . md5($title . '|' . $contextoImportante);
+
+$mongoLoaded = false;
+if (file_exists(__DIR__ . '/mongo.php')) {
+    require_once __DIR__ . '/mongo.php';
+    $mongoLoaded = true;
+    $cached = obtenerResumenCache($paperId);
+    if ($cached && isset($cached['resumen']) && trim($cached['resumen']) !== '') {
+        json_response([
+            'mensaje' => 'Resumen encontrado en caché.',
+            'resumen' => $cached['resumen'],
+            'paperId' => $paperId,
+            'archivoResumen' => 'descargar_resumen.php?paperId=' . urlencode($paperId),
+            'fuente' => 'MongoDB'
+        ]);
+    }
+}
+
 $prompt = "Analiza el siguiente artículo científico y genera una respuesta profesional, clara y limpia en español.\n\n" .
     "REGLAS IMPORTANTES:\n" .
     "1. Usa únicamente la información proporcionada.\n" .
@@ -485,33 +486,14 @@ if (!$result['ok']) {
 }
 
 $resumen = $result['content'];
-$mongoGuardado = false;
-$mongoError = null;
-
 if ($mongoLoaded) {
-    // Se guarda con el ID de caché, que es el que usa el botón "Descargar resumen".
-    $mongoGuardado = guardarResumenCache($cachePaperId, $title, $resumen);
-
-    // También se guarda una copia/alias con el paperId original de Semantic Scholar.
-    // Así no falla si alguna parte del frontend o una prueba manual descarga usando el paperId visible.
-    if ($mongoGuardado && $paperId !== $cachePaperId) {
-        guardarResumenCache($paperId, $title, $resumen);
-    }
-
-    if (!$mongoGuardado && function_exists('getUltimoErrorMongo')) {
-        $mongoError = getUltimoErrorMongo();
-    }
+    guardarResumenCache($paperId, $title, $resumen);
 }
 
 json_response([
-    'mensaje' => $mongoGuardado
-        ? 'Resumen completo generado y guardado correctamente.'
-        : 'Resumen completo generado, pero NO se pudo guardar en MongoDB.',
+    'mensaje' => 'Resumen completo generado correctamente.',
     'resumen' => $resumen,
     'paperId' => $paperId,
-    'cachePaperId' => $cachePaperId,
-    'archivoResumen' => $mongoGuardado ? 'descargar_resumen.php?paperId=' . urlencode($cachePaperId) : null,
-    'fuente' => $mongoGuardado ? 'OpenAI + MongoDB' : 'OpenAI',
-    'mongoGuardado' => $mongoGuardado,
-    'mongoError' => $mongoError
+    'archivoResumen' => 'descargar_resumen.php?paperId=' . urlencode($paperId),
+    'fuente' => $mongoLoaded ? 'OpenAI + MongoDB' : 'OpenAI'
 ]);
