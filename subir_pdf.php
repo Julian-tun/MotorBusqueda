@@ -19,7 +19,10 @@
             <small></small>
           </div>
         </div>
-        <a class="nav-link" href="index.html">Volver al buscador</a>
+        <div class="nav-actions">
+          <a class="nav-link" href="biblioteca.php">Biblioteca</a>
+          <a class="nav-link" href="index.html">Volver al buscador</a>
+        </div>
       </nav>
 
       <section class="hero-grid">
@@ -93,11 +96,13 @@
             <span>${data.fuente || 'IA'}</span>
           </div>
           <pre>${escapeHtml(data.resumen)}</pre>
-          ${
-            data.archivoResumen
-              ? `<a class="btn secondary" href="${data.archivoResumen}">Descargar resumen</a>`
-              : ''
-          }
+          ${data.paperId ? `
+            <div class="download-pack">
+              <a class="btn secondary" href="descargar_formato.php?paperId=${encodeURIComponent(data.paperId)}&formato=txt">Descargar TXT</a>
+              <a class="btn secondary" href="descargar_formato.php?paperId=${encodeURIComponent(data.paperId)}&formato=pdf">Descargar PDF</a>
+              <a class="btn secondary" href="descargar_formato.php?paperId=${encodeURIComponent(data.paperId)}&formato=word">Descargar Word</a>
+              <a class="btn" href="chatbot_articulo.php?paperId=${encodeURIComponent(data.paperId)}">Chatbot IA</a>
+            </div>` : ''}
         `;
       } catch (err) {
         resultDiv.className = 'full-summary error-inline';

@@ -235,6 +235,11 @@ $mongoLoaded = false;
 if (file_exists(__DIR__ . '/mongo.php')) {
     require_once __DIR__ . '/mongo.php';
     $mongoLoaded = true;
+
+    if (function_exists('guardarTextoArticulo')) {
+        guardarTextoArticulo($paperId, $title, $text, $contextoImportante, 'subida_pdf');
+    }
+
     $cached = obtenerResumenCache($paperId);
     if ($cached && isset($cached['resumen']) && trim($cached['resumen']) !== '') {
         json_response([

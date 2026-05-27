@@ -5,11 +5,13 @@ RUN apt-get update && apt-get install -y \
     unzip \
     git \
     libzip-dev \
+    libpng-dev \
+    libxml2-dev \
     libssl-dev \
     pkg-config \
     && pecl install mongodb \
     && docker-php-ext-enable mongodb \
-    && docker-php-ext-install zip \
+    && docker-php-ext-install zip gd xml \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
